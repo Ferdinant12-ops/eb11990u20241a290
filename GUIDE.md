@@ -16,7 +16,7 @@ Layer (ACL) entre bounded contexts y eventos de dominio, organizado en los bound
 
 - JDK 26.
 - Maven 3.9+ (o abrir el proyecto en IntelliJ IDEA, que trae Maven integrado).
-- PostgreSQL 16+ instalado y en ejecución.
+- MySQL 8+ instalado y en ejecución.
 - Postman, cURL o Swagger UI para probar los endpoints.
 
 ## 1. Creación del proyecto
@@ -25,10 +25,10 @@ Cree el proyecto con Spring Initializr. Más información en: https://start.spri
 
 > [!TIP]
 > **Primer paso (recomendado):** use el siguiente enlace, que abre Spring Initializr ya
-> preconfigurado (Spring Web, Spring Data JPA, Validation, PostgreSQL Driver, Lombok, DevTools). Solo
+> preconfigurado (Spring Web, Spring Data JPA, Validation, MySQL Driver, Lombok, DevTools). Solo
 > presione **GENERATE** para descargar el proyecto base:
 >
-> https://start.spring.io/#!type=maven-project&language=java&platformVersion=4.0.6&packaging=jar&configurationFileFormat=properties&jvmVersion=26&groupId=com.whirlpool.care.platform&artifactId=eb11990u20241a290&packageName=com.whirlpool.care.platform.u20241a290&dependencies=data-jpa,validation,web,devtools,postgresql,lombok
+> https://start.spring.io/#!type=maven-project&language=java&platformVersion=4.0.6&packaging=jar&configurationFileFormat=properties&jvmVersion=26&groupId=com.whirlpool.care.platform&artifactId=eb11990u20241a290&packageName=com.whirlpool.care.platform.u20241a290&dependencies=data-jpa,validation,web,devtools,mysql,lombok
 >
 > Antes de generar, **reemplace** en el formulario el `Artifact` (`eb11990u20241a290`) y el
 > `Package name` (`com.whirlpool.care.platform.u20241a290`) por los suyos según el PDF del examen.
@@ -53,7 +53,7 @@ Dependencias:
 Spring Web
 Spring Data JPA
 Validation
-PostgreSQL Driver
+MySQL Driver
 Lombok
 Spring Boot DevTools
 ```
@@ -86,21 +86,15 @@ librería `pluralize` (usada por la estrategia de nombres de base de datos):
 
 ## 2. Creación de la base de datos
 
-Cargue pgAdmin o la consola `psql` y cree la base de datos:
+Cargue MySQL Workbench o la consola `mysql` y cree la base de datos (esquema) `whirlpool_os`:
 
 ```sql
-CREATE DATABASE whirlpool_os;
+CREATE DATABASE IF NOT EXISTS whirlpool_os;
 ```
 
-Conéctese a la base `whirlpool_os` y cree el esquema:
-
-```sql
-CREATE SCHEMA IF NOT EXISTS whirlpool_os;
-```
-
-> [!IMPORTANT]
-> Hibernate crea automáticamente las tablas, pero **no crea esquemas**. Por eso el esquema
-> `whirlpool_os` debe crearse manualmente una sola vez.
+> [!NOTE]
+> En MySQL, "esquema" y "base de datos" son sinónimos. La configuración usa
+> `createDatabaseIfNotExist=true`, así que también se creará automáticamente si no existe.
 
 ## 3. Configuración de application.properties
 
@@ -109,19 +103,18 @@ Reemplace `src/main/resources/application.properties`:
 ```properties
 spring.application.name=eb11990u20241a290
 
-# Spring DataSource Configuration (PostgreSQL, esquema whirlpool_os)
-spring.datasource.url=jdbc:postgresql://localhost:5432/whirlpool_os
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-spring.datasource.driver-class-name=org.postgresql.Driver
+# Spring DataSource Configuration (MySQL, esquema whirlpool_os)
+spring.datasource.url=jdbc:mysql://localhost:3306/whirlpool_os?createDatabaseIfNotExist=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=root
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 # Spring Data JPA / Hibernate Configuration
-spring.jpa.database=postgresql
+spring.jpa.database=mysql
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.properties.hibernate.default_schema=whirlpool_os
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 spring.jpa.hibernate.naming.physical-strategy=com.whirlpool.care.platform.u20241a290.shared.infrastructure.persistence.jpa.configuration.strategy.SnakeCaseWithPluralizedTablePhysicalNamingStrategy
 
 # Puerto de escucha del API
@@ -137,14 +130,7 @@ spring.messages.encoding=UTF-8
 ```
 
 > [!NOTE]
-> Cambie `postgres/postgres` por sus credenciales reales de PostgreSQL.
-
-> [!TIP]
-> **El proyecto trae soporte para las dos bases de datos** mediante Spring Profiles. En
-> `application.properties` la línea `spring.profiles.active=postgres` decide cuál usar. Cambie a
-> `mysql` y arrancará con `application-mysql.properties` (MySQL en `jdbc:mysql://localhost:3306/whirlpool_os`).
-> Como **este examen (Whirlpool) pide MySQL**, para la entrega use `spring.profiles.active=mysql`.
-> Los dos drivers ya están en el `pom.xml`.
+> Cambie `root/root` por sus credenciales reales de MySQL.
 
 ## 4. Estructura de paquetes
 
