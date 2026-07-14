@@ -11,7 +11,7 @@ and an Anti-Corruption Layer between the `contracts` and `entitlement` bounded c
 - Java 26
 - Spring Boot 4
 - Spring Data JPA (Hibernate)
-- MySQL (schema `whirlpool_os`)
+- PostgreSQL (schema `whirlpool_os`)
 - SpringDoc OpenAPI (Swagger UI)
 - Lombok
 - Maven
@@ -26,7 +26,7 @@ and an Anti-Corruption Layer between the `contracts` and `entitlement` bounded c
 - `GET /api/v1/policies` - returns the stored policies (with calculated coverage status).
 
 ## Running
-1. Create the MySQL database (or rely on `createDatabaseIfNotExist=true`): `CREATE DATABASE whirlpool_os;`
+1. Create the PostgreSQL database and schema: `CREATE DATABASE whirlpool_os;` then, connected to it, `CREATE SCHEMA IF NOT EXISTS whirlpool_os;`
 2. Adjust `spring.datasource.username` / `password` in `src/main/resources/application.properties`.
 3. Run the application (IntelliJ IDEA, or `mvn spring-boot:run`).
 4. API: `http://localhost:8290` - Swagger UI: `http://localhost:8290/swagger-ui/index.html`
